@@ -147,7 +147,7 @@
 
 @end
 
-/*
+
  #if defined(_cplusplus)
  extern "C"{
  #endif
@@ -161,88 +161,22 @@
  [iOSManger Init];
  }
  }
- const char* GetNetworkType()
+ const char* GetIOSNetworkType()
  {
- if(iOSManger == nil)
+     if(iOSManger == nil)
+     {
+         Init();
+     }
+     return strdup([iOSManger.statusString UTF8String]);
+ }
+ int CTGetSignalStrength(); // private method (not in the header) of Core Telephony
+ const int GetIOSNetworkStrength()
  {
- Init();
+     int signalStrength = CTGetSignalStrength();
+     return signalStrength;
  }
- return strdup([iOSManger.statusString UTF8String]);
- }
+ 
  #if defined(_cplusplus)
  }
  #endif
- */
-#if defined(_cplusplus)
-extern "C"{
-#endif
-    UIApplication *app = nil;
-    NSString * dataNetworkItemview ;
-    NSString * networkType;
-    void Init()
-    {
-        dataNetworkItemview = @"";
-        networkType = @"";
-        if(app == nil)
-        {
-            app = [UIApplication sharedApplication];
-        }
-    }
-    const int GetIOSNetworkStrength()
-    {
-        if(app == nil)
-        {
-            Init();
-        }
-        NSArray* subViews = [[[app valueForKey:@"statusBar"]valueForKey:@"foregroundView"]subviews];
-        for (id subView in subViews) {
-            if([subView isKindOfClass:[NSClassFromString(@"UIStatusBarDataNetworkItemView") class]])
-            {
-                dataNetworkItemview = subView;
-                break;
-            }
-        }
-        int signalStrength = [[dataNetworkItemview valueForKey:@"_wifiStrengthBars"] intValue];
-        return signalStrength;
-    }
-    const char * GetIOSNetworkType()
-    {
-        UIApplication *app = [UIApplication sharedApplication];
-        NSArray *subviews = [[[app valueForKeyPath:@"statusBar"] valueForKeyPath:@"foregroundView"] subviews];
-        for (id subview in subviews) {
-            if ([subview isKindOfClass:NSClassFromString(@"UIStatusBarDataNetworkItemView")]) {
-                int type = [[subview valueForKeyPath:@"dataNetworkType"] intValue];
-                switch (type) {
-                    case 0:
-                        NSLog(@"Unreachable");
-                        networkType =@"Unreachable";
-                        break;
-                    case 1:
-                        NSLog(@"2G");
-                        networkType =@"2G";
-                        break;
-                    case 2:
-                        NSLog(@"3G");
-                        networkType =@"3G";
-                        break;
-                    case 3:
-                        NSLog(@"4G");
-                        networkType =@"4G";
-                        break;
-                    case 5:
-                    {
-                        NSLog(@"WIFI");
-                        networkType =@"WIFI";
-                    }
-                        break;
-                    default:
-                        break;
-                }
-            }
-        }
-        return strdup([networkType UTF8String]);
-    }
-#if defined(_cplusplus)
-}
-#endif
-
+ 
